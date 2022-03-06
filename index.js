@@ -18,61 +18,69 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 async function run() {
-    try {
-        await client.connect();
-        // console.log("connected to database")
-        const database = client.db('travelguru');
-        const serviceCollection = database.collection('services')
+  try {
+    await client.connect();
+    // console.log("connected to database")
+    const database = client.db('travelguru');
+    const serviceCollection = database.collection('services')
 
-        //  get all data api
-        app.get('/services', async(req,res) => {
-            const cursor = serviceCollection.find({});
-            const services = await cursor.toArray();
-            res.send(services);
-        })
+    //  get all data api
+    app.get('/services', async (req, res) => {
+      const cursor = serviceCollection.find({});
+      const services = await cursor.toArray();
+      res.send(services);
+    })
 
-        // Get Single Service
-        app.get('/services/:id', async (req,res) =>{
-            const id = req.params.id;    
-            const query = { _id: ObjectId(id) };
-            const service = await serviceCollection.findOne(query);
-            res.json(service);
-        })
-
-
-        // Post api
-        app.post('/services', async (req, res) => {
-            const service = req.body;
-            console.log('hit the post api', service)
-            const result = await serviceCollection.insertOne(service)
-            // res.send('post hitted')
-            console.log(result);
-            res.json(result)
-        })
+    // Get Single Service
+    app.get('/services/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const service = await serviceCollection.findOne(query);
+      res.json(service);
+    })
 
 
-        // // Delet Api
-        // app.delete('/services/:id', async (req,res) =>{
-        //     const id = req.params.id;
-        //     const query = {_id:ObjectId(id)};
-        //     const result = await serviceCollection.deleteOne (query);
-        //     res.json(result);
-        // })
+    // Post api
+    app.post('/services', async (req, res) => {
+      const service = req.body;
+      console.log('hit the post api', service)
+      const result = await serviceCollection.insertOne(service)
+      // res.send('post hitted')
+      console.log(result);
+      res.json(result)
+    })
 
-    }
-    finally {
+    // post api for all order
+    app.post("/placebook", async (req, res) => {
+      const placebookings = req.body;
+      const result = await orderCollection.insertOne(placebookings);
+      // console.log("A document was inserted with the _id:", result);
+      res.json(result);
+    });
 
-    }
+
+    // // Delet Api
+    // app.delete('/services/:id', async (req,res) =>{
+    //     const id = req.params.id;
+    //     const query = {_id:ObjectId(id)};
+    //     const result = await serviceCollection.deleteOne (query);
+    //     res.json(result);
+    // })
+
+  }
+  finally {
+
+  }
 }
 
 run().catch(console.dir);
 
 
-  
-  app.get("/", (req, res) => {
-    res.send("travel guru");
-  });
-  
-  app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
-  });
+
+app.get("/", (req, res) => {
+  res.send("travel guru");
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});
