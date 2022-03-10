@@ -23,6 +23,8 @@ async function run() {
     // console.log("connected to database")
     const database = client.db('travelguru');
     const serviceCollection = database.collection('services')
+    const orderCollection = database.collection('orders')
+
 
     //  get all data api
     app.get('/services', async (req, res) => {
@@ -50,22 +52,72 @@ async function run() {
       res.json(result)
     })
 
-    // post api for all order
-    app.post("/placebook", async (req, res) => {
-      const placebookings = req.body;
-      const result = await orderCollection.insertOne(placebookings);
-      // console.log("A document was inserted with the _id:", result);
+    // add orders api
+    app.post('/orders', async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
       res.json(result);
+    })
+    // Get Single Service
+    app.get('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const service = await serviceCollection.findOne(query);
+      res.json(service);
+    })
+
+
+    // get api using email
+    app.get("/myorder/:email", async (req, res) => {
+      const email = req.params.email;
+      const myorder = await orderCollection.find({ email }).toArray();
+      // console.log(mybookings);
+      res.send(myorder);
+    });
+
+    
+    // delete api for my booking
+    app.delete("/myorder/:id", async (req, res) => {
+      const Id = req.params.id;
+      const query = { _id: ObjectId(Id) };
+      const deleteBooking = await orderCollection.deleteOne(query);
+      // console.log(deleteBooking);
+      res.json(deleteBooking);
+    });
+
+// All customer order 
+    app.get("/allorder", async (req, res) => {
+      const allorder = await orderCollection.find({}).toArray();
+      res.send(allorder);
+    });
+
+    // 
+    // update api for status
+    app.put("/myorder/:id", async (req, res) => {
+      const updateId = req.params.id;
+      const updatedStatus = req.body;
+      // console.log(updatedStatus);
+      const filter = { _id: ObjectId(updateId) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: updatedStatus.status,
+        },
+      };
+
+      // === ==========
+      const approved = await orderCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      // console.log(result);
+
+      res.json(approved);
     });
 
 
-    // // Delet Api
-    // app.delete('/services/:id', async (req,res) =>{
-    //     const id = req.params.id;
-    //     const query = {_id:ObjectId(id)};
-    //     const result = await serviceCollection.deleteOne (query);
-    //     res.json(result);
-    // })
+
 
   }
   finally {
