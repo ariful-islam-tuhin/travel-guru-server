@@ -130,7 +130,7 @@ run().catch(console.dir);
 
 
 app.get("/", (req, res) => {
-  res.send("travel guru");
+  res.send("travel guru server side");
 });
 
 app.listen(port, () => {
